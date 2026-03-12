@@ -1,13 +1,9 @@
 use crate::weather::*;
-use chrono::{DateTime, Local, TimeZone};
+use chrono::{Local, TimeZone};
 use colored::Colorize;
 
 /// Display current weather
 pub fn show_current(weather: &CurrentWeather) {
-    // TODO: Print a beautiful formatted display of current weather
-    // HINT: Use colored for colorful output
-    // HINT: Use Unicode symbols for weather (☀️ ☁️ 🌧️ ⛈️ ❄️)
-
     println!(
         "\n{}",
         "╔═══════════════════════════════════╗".bright_cyan()
@@ -15,28 +11,48 @@ pub fn show_current(weather: &CurrentWeather) {
     println!("{}", "║     CURRENT WEATHER".bright_cyan().bold());
     println!("{}", "╚═══════════════════════════════════╝".bright_cyan());
 
-    // TODO: Print location
-    // TODO: Print temperature (large, colored based on temp)
-    // TODO: Print feels like
-    // TODO: Print description
-    // TODO: Print humidity, wind, pressure
-    // TODO: Print timestamp
-    println!("{}", weather.location.bright_yellow().bold());
-    println!("{}", weather.temperature.to_string().bright_red().bold());
-    println!("{}", weather.feels_like.to_string().bright_red());
+    let emoji = get_weather_emoji(&weather.description);
+
+    println!("  📍 {}", weather.location.bright_yellow().bold());
+    println!(
+        "  {} {} (feels like {})",
+        emoji,
+        format_temp(weather.temperature).bold(),
+        format_temp(weather.feels_like)
+    );
+    println!("  {}", weather.description.bright_white());
+    println!();
+    println!(
+        "  💧 Humidity: {:>4}%",
+        weather.humidity.to_string().bright_blue()
+    );
+    println!(
+        "  💨 Wind:     {:>4} m/s",
+        format!("{:.1}", weather.wind_speed).bright_blue()
+    );
+    println!(
+        "  🔽 Pressure: {:>4} hPa",
+        weather.pressure.to_string().bright_blue()
+    );
+    println!(
+        "  👁️  Visibility: {} m",
+        weather.visibility.to_string().bright_blue()
+    );
+    println!();
+    println!(
+        "  🕐 {}",
+        format_timestamp(weather.timestamp).bright_black()
+    );
+    println!();
 }
 
 /// Display weather forecast
 pub fn show_forecast(forecast: &Forecast) {
-    // TODO: Print formatted forecast
-    // HINT: Show each day with min/max temps, description
-    // HINT: Use colored bars to show temperature range
-
     println!(
         "\n{}",
         format!(
             "📅 {}-Day Forecast for {}",
-            forecast.days.len(),
+            forecast.days.len() - 1,
             forecast.location
         )
         .bright_cyan()
@@ -45,20 +61,29 @@ pub fn show_forecast(forecast: &Forecast) {
 
     println!("{}", "─".repeat(50).bright_black());
 
-    // TODO: Loop through each day
-    // TODO: Format date nicely
-    // TODO: Show temperature range with color
-    // TODO: Show description and precipitation chance
+    for day in forecast.days.iter().take(forecast.days.len() - 1) {
+        let emoji = get_weather_emoji(&day.description);
+        let precip = day
+            .precipitation_chance
+            .map(|p| format!(" 💧 {:.0}%", p * 100.0))
+            .unwrap_or_default();
 
-    todo!("Implement show_forecast")
+        println!(
+            "  {} {:<12}  {} / {}  {} {}",
+            emoji,
+            day.date,
+            format_temp(day.temp_min),
+            format_temp(day.temp_max),
+            day.description.bright_white(),
+            precip.bright_blue()
+        );
+    }
+
+    println!("{}\n", "─".repeat(50).bright_black());
 }
 
 /// Display location search results
 pub fn show_locations(locations: &[Location]) {
-    // TODO: Print search results
-    // HINT: Show numbered list of locations
-    // HINT: Include city, state (if present), country
-
     if locations.is_empty() {
         println!("{}", "No locations found".yellow());
         return;
@@ -67,54 +92,70 @@ pub fn show_locations(locations: &[Location]) {
     println!("\n{}", "🔍 Search Results:".bright_cyan().bold());
     println!("{}", "─".repeat(50).bright_black());
 
-    // TODO: Print each location
-    // HINT: for (i, loc) in locations.iter().enumerate() { ... }
+    for (i, loc) in locations.iter().enumerate() {
+        let state_str = loc
+            .state
+            .as_deref()
+            .map(|s| format!(", {}", s))
+            .unwrap_or_default();
 
-    todo!("Implement show_locations")
+        println!(
+            "  {} {}{}, {}",
+            format!("[{}]", i + 1).bright_cyan(),
+            loc.name.bright_white().bold(),
+            state_str,
+            loc.country.bright_yellow()
+        );
+        println!("     📍 {:.4}, {:.4}", loc.lat, loc.lon);
+    }
+
+    println!("{}\n", "─".repeat(50).bright_black());
 }
 
 /// Get weather emoji based on description
 fn get_weather_emoji(description: &str) -> &str {
-    // TODO: Map weather descriptions to emojis
-    // HINT: Use match or if/else on description.to_lowercase()
-    // Examples:
-    // "clear" => "☀️"
-    // "clouds" => "☁️"
-    // "rain" => "🌧️"
-    // "thunderstorm" => "⛈️"
-    // "snow" => "❄️"
-    // "mist" | "fog" => "🌫️"
-
-    todo!("Implement get_weather_emoji")
+    let desc = description.to_lowercase();
+    if desc.contains("thunderstorm") {
+        "⛈️"
+    } else if desc.contains("drizzle") {
+        "🌦️"
+    } else if desc.contains("rain") {
+        "🌧️"
+    } else if desc.contains("snow") {
+        "❄️"
+    } else if desc.contains("mist") || desc.contains("fog") || desc.contains("haze") {
+        "🌫️"
+    } else if desc.contains("clear") {
+        "☀️"
+    } else if desc.contains("cloud") {
+        "☁️"
+    } else {
+        "🌡️"
+    }
 }
 
 /// Get temperature color based on value
 fn get_temp_color(temp: f64) -> colored::Color {
-    // TODO: Return color based on temperature
-    // HINT: match temp {
-    //     t if t < 0.0 => Color::BrightBlue,
-    //     t if t < 10.0 => Color::Cyan,
-    //     t if t < 20.0 => Color::Yellow,
-    //     t if t < 30.0 => Color::BrightYellow,
-    //     _ => Color::Red,
-    // }
-
-    todo!("Implement get_temp_color")
+    match temp {
+        t if t < 0.0 => colored::Color::BrightBlue,
+        t if t < 10.0 => colored::Color::Cyan,
+        t if t < 20.0 => colored::Color::Yellow,
+        t if t < 30.0 => colored::Color::BrightYellow,
+        _ => colored::Color::Red,
+    }
 }
 
 /// Format temperature with color
 fn format_temp(temp: f64) -> String {
-    // TODO: Format temperature with appropriate color
-    // HINT: format!("{}°C", temp).color(get_temp_color(temp))
-
-    todo!("Implement format_temp")
+    format!("{:.1}°C", temp)
+        .color(get_temp_color(temp))
+        .to_string()
 }
 
 /// Convert Unix timestamp to readable time
 fn format_timestamp(timestamp: i64) -> String {
-    // TODO: Convert timestamp to local time
-    // HINT: Local.timestamp_opt(timestamp, 0)
-    // HINT: Format as: "Monday, Jan 15, 2025 at 14:30"
-
-    todo!("Implement format_timestamp")
+    match Local.timestamp_opt(timestamp, 0) {
+        chrono::LocalResult::Single(dt) => dt.format("%A, %b %d, %Y at %H:%M").to_string(),
+        _ => "Unknown time".to_string(),
+    }
 }

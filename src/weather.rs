@@ -69,6 +69,7 @@ pub struct MainWeather {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct WeatherDescription {
     pub description: String,
     pub main: String,
@@ -97,6 +98,7 @@ pub struct ForecastItem {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct City {
     pub name: String,
     pub country: String,

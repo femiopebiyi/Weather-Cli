@@ -1,5 +1,6 @@
 use crate::error::{Result, WeatherError};
 use crate::weather::*;
+
 use std::env;
 
 const BASE_URL: &str = "https://api.openweathermap.org/data/2.5";
@@ -13,8 +14,6 @@ fn get_api_key() -> Result<String> {
         Ok(key) => Ok(key),
         Err(error) => Err(WeatherError::EnvError(error.to_string())),
     }
-    // HINT: env::var("OPENWEATHER_API_KEY")
-    // HINT: Map error to WeatherError::EnvError
 }
 
 /// Fetch current weather for a location
@@ -139,13 +138,6 @@ pub async fn search_locations(query: &str) -> Result<Vec<Location>> {
 
 /// Helper function to handle API errors
 fn handle_api_error(status: reqwest::StatusCode, location: &str) -> WeatherError {
-    // TODO: Map HTTP status codes to appropriate errors
-    // HINT: match status.as_u16() {
-    //     401 => WeatherError::InvalidApiKey,
-    //     404 => WeatherError::LocationNotFound(location.to_string()),
-    //     _ => WeatherError::RequestFailed(format!("Status: {}", status))
-    // }
-
     match status.as_u16() {
         401 => WeatherError::InvalidApiKey,
         404 => WeatherError::LocationNotFound(location.to_string()),

@@ -1,7 +1,4 @@
-use std::{
-    env::{self, args},
-    ops::Add,
-};
+use std::env::{self};
 
 mod api;
 mod cli;
@@ -11,9 +8,11 @@ mod weather;
 
 use clap::Parser;
 use cli::{Cli, Commands};
-use colored::Colorize;
 
-use crate::api::fetch_current_weather;
+use crate::{
+    api::{fetch_current_weather, fetch_forecast, search_locations},
+    display::{show_forecast, show_locations},
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,21 +42,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Forecast { location, days } => {
             // TODO: Fetch forecast
             // HINT: api::fetch_forecast(&location, days).await
-
-            // TODO: Display forecast
-            // HINT: display::show_forecast(&forecast)
+            let forecast = fetch_forecast(&location, days).await?;
 
             println!("Fetching {}-day forecast for: {}", days, location);
+            // TODO: Display forecast
+            // HINT: display::show_forecast(&forecast)
+            show_forecast(&forecast);
         }
 
         Commands::Search { query } => {
             // TODO: Search for locations
             // HINT: api::search_locations(&query).await
+            let locations = search_locations(&query).await?;
 
             // TODO: Display matching locations
             // HINT: display::show_locations(&locations)
-
             println!("Searching for locations matching: {}", query);
+            show_locations(&locations);
         }
     }
 

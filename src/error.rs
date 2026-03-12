@@ -1,6 +1,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum WeatherError {
     // TODO: Define error types
     #[error("API request failed: {0}")]
