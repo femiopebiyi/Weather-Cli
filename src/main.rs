@@ -19,8 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: Load environment variables
 
     dotenv::dotenv().ok();
-    let api_key = env::var("OPENWEATHER_API_KEY")?;
-    println!("API Key loaded: {}...", &api_key[..10]);
+    env::var("OPENWEATHER_API_KEY")?;
 
     // HINT: dotenv::dotenv().ok();
 
